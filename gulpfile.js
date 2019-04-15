@@ -14,53 +14,53 @@ var gulp = require('gulp'),
 
 gulp.task("concatScripts", function() {
 	return gulp.src([
-		'assets/js/vendor/jquery-3.3.1.slim.min.js',
-		'assets/js/vendor/popper.min.js',
-		'assets/js/vendor/bootstrap.min.js',
-		'assets/js/functions.js'
+		'src/assets/js/vendor/jquery-3.3.1.slim.min.js',
+		'src/assets/js/vendor/popper.min.js',
+		'src/assets/js/vendor/bootstrap.min.js',
+		'src/assets/js/functions.js'
 	])
 		.pipe(maps.init())
 		.pipe(concat('main.js'))
 		.pipe(maps.write('./'))
-		.pipe(gulp.dest('assets/js'))
+		.pipe(gulp.dest('src/assets/js'))
 		.pipe(browserSync.stream());
 });
 
 gulp.task("minifyScripts", ["concatScripts"], function() {
-  return gulp.src("assets/js/main.js")
+  return gulp.src("src/assets/js/main.js")
 	  .pipe(uglify())
 	  .pipe(rename('main.min.js'))
 	  .pipe(gulp.dest('dist/assets/js'));
 });
 
 gulp.task('compileSass', function() {
-  return gulp.src("assets/css/main.scss")
+  return gulp.src("src/assets/css/main.scss")
     .pipe(maps.init())
     .pipe(sass().on('error', sass.logError))
     .pipe(autoprefixer())
     .pipe(maps.write('./'))
-    .pipe(gulp.dest('assets/css'))
+    .pipe(gulp.dest('src/assets/css'))
     .pipe(browserSync.stream());
 });
 
 gulp.task("minifyCss", ["compileSass"], function() {
-  return gulp.src("assets/css/main.css")
+  return gulp.src("src/assets/css/main.css")
     .pipe(cssmin())
     .pipe(rename('main.min.css'))
     .pipe(gulp.dest('dist/assets/css'));
 });
 
 gulp.task('watchFiles', function() {
-  gulp.watch('assets/css/**/*.scss', ['compileSass']);
-  gulp.watch('assets/js/*.js', ['concatScripts']);
+  gulp.watch('src/assets/css/**/*.scss', ['compileSass']);
+  gulp.watch('src/assets/js/*.js', ['concatScripts']);
 })
 
 gulp.task('clean', function() {
-  del(['dist', 'assets/css/main.css*', 'assets/js/main*.js*']);
+  del(['dist', 'src/assets/css/main.css*', 'src/assets/js/main*.js*']);
 });
 
 gulp.task('renameSources', function() {
-  return gulp.src(['*.html', '**/*.php', '!dist', '!dist/**'])
+  return gulp.src(['src/*.html', '**/*.php', '!dist', '!dist/**'])
     .pipe(htmlreplace({
       'js': 'assets/js/main.min.js',
       'css': 'assets/css/main.min.css'
@@ -70,21 +70,20 @@ gulp.task('renameSources', function() {
 
 gulp.task("build", ['minifyScripts', 'minifyCss'], function() {
   return gulp.src([
-		'*.html',
-		'*.php',
-		'favicon.ico',
-		"assets/img/**"
-	], { base: './'})
+		'src/*.html',
+		'src/favicon.ico',
+		"src/assets/img/**"
+	], { base: './src'})
 		.pipe(gulp.dest('dist'));
 });
 
 gulp.task('serve', ['watchFiles'], function(){
   browserSync.init({
-  	server: "./"
+  	server: "./src"
   });
 
-  gulp.watch("assets/css/**/*.scss", ['watchFiles']);
-  gulp.watch(['*.html', '*.php']).on('change', browserSync.reload);
+  gulp.watch("src/assets/css/**/*.scss", ['watchFiles']);
+  gulp.watch(['src/*.html', '*.php']).on('change', browserSync.reload);
 });
 
 gulp.task("default", ["clean", 'build'], function() {
